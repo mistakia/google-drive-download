@@ -10,6 +10,8 @@ yarn-error.log
 
 # App specific
 #
+files.json
+completed.json
 credentials.json
 token.json
 config.js

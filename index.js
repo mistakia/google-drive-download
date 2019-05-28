@@ -152,7 +152,16 @@ async function main(auth) {
     const end = moment().hour(13)
     while (moment().isBetween(start, end) && difference.length) {
       const file = difference.shift()
-      await downloadFile(file)
+      const filepath = path.resolve(config.dest_path, file.name)
+
+      const downloaded = await isDownloaded(file, filepath)
+      if (!downloaded) {
+        await downloadFile(file, filepath)
+      } else {
+        downloaded_files.push(file)
+        jsonfile.writeFileSync(COMPLETED_PATH, downloaded_files, { spaces: 2 })
+        console.log('already downloaded', item.name)
+      }
     }
 
   } catch (e) {
@@ -160,12 +169,40 @@ async function main(auth) {
   }
 }
 
-function downloadFile(item) {
+function isDownloaded(item, filepath) {
   return new Promise((resolve, reject) => {
-    const filepath = path.resolve(config.dest_path, item.name)
+    // check if file exists - otherwise resolve
+    let stats
+    try {
+      stats = fs.statSync(filepath)
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        console.log(`${filepath} does not exist`)
+        return resolve(false)
+      }
+
+      return reject(e)
+    }
+
+    drive.files.get({
+      fileId: item.id,
+      fields: ['size']
+    }, (err, res) => {
+      if (err) {
+        return reject(err)
+      }
+
+      const { size } = res.data
+      console.log(`Downloaded file size of ${stats.size} compared to ${size}`)
+      resolve(size == stats.size)
+    })
+  })
+}
+
+function downloadFile(item, filepath) {
+  return new Promise((resolve, reject) => {
     const dest = fs.createWriteStream(filepath)
     console.log('downloading', filepath)
-
     dest.on('finish', () => {
       downloaded_files.push(item)
       jsonfile.writeFileSync(COMPLETED_PATH, downloaded_files, { spaces: 2 })
