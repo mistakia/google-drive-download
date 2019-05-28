@@ -141,7 +141,7 @@ async function main(auth) {
     // get diff
     let difference = files.filter((file) => {
       return !downloaded_files.find((downloaded_file) => {
-        return downloaded_file.id = file.id
+        return downloaded_file.id == file.id
       })
     })
 
