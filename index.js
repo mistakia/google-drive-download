@@ -160,7 +160,7 @@ async function main(auth) {
       } else {
         downloaded_files.push(file)
         jsonfile.writeFileSync(COMPLETED_PATH, downloaded_files, { spaces: 2 })
-        console.log('already downloaded', item.name)
+        console.log('already downloaded', file.name)
       }
     }
 
@@ -216,6 +216,10 @@ function downloadFile(item, filepath) {
     }, {
       responseType: 'stream'
     }, (err, res) => {
+      if (err) {
+        return reject(err)
+      }
+
       res.data.on('end', function () {
         console.log('google drive download complete', item.name)
       }).on('error', function (err) {
