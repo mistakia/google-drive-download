@@ -6,7 +6,7 @@
   "dependencies": {
     "googleapis": "^27.0.0",
     "jsonfile": "^5.0.0",
-    "moment": "^2.24.0"
+    "moment": "^2.29.2"
   },
   "devDependencies": {},
   "scripts": {
